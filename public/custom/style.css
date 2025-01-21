@@ -1,0 +1,384 @@
+
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 10px;
+}
+
+.tag {
+    background-color: #007bff;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tag-remove {
+    cursor: pointer;
+    font-size: 12px;
+}
+
+
+
+
+#cancel-btn {
+    padding: 8px 16px;
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#cancel-btn:hover {
+    background-color: #5a6268;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+/* Modal Styling */
+.modal {
+    display: none; /* Modal disembunyikan secara default */
+    position: fixed;
+    z-index: 1000; /* Pastikan z-index lebih tinggi dari elemen lain */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Latar belakang semi-transparan */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Header Modal */
+.modal-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Footer Modal */
+.modal-footer {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    z-index: 1;
+    padding: 10px 0;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Konten Modal (Bisa Di-scroll) */
+.modal-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 10px 0;
+}
+
+/* Mencegah scroll pada body saat modal terbuka */
+body.modal-open {
+    overflow: hidden;
+}
+.service-list {
+    margin-top: 10px;
+}
+
+.service-item {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.service-item:hover {
+    background-color: #f9f9f9;
+}
+
+/* Input Styling */
+#search-service {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    transition: border-color 0.3s ease;
+}
+
+#search-service:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+#selected-service {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+
+.card {
+    padding: 20px;
+    border: 1px solid #dedede;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 5px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size:smaller;
+    font-weight: 500;
+    /* font-weight: bold; */
+}
+
+
+
+
+.service-item .service-info h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.service-item .service-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.minimalist-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.minimalist-table th,
+.minimalist-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.minimalist-table th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    color: #555;
+}
+
+.minimalist-table tr:hover {
+    background-color: #f9f9f9;
+}
+
+.minimalist-table td {
+    color: #777;
+}
+
+.minimalist-table img {
+    max-width: 100px;
+    height: auto;
+    border-radius: 4px;
+}
+
+.minimalist-table .action-button {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.minimalist-table .action-button:hover {
+    background-color: #cc0000;
+}
+
+.image-loader img {
+    width: 30px;
+    height: auto;
+}
+
+h1 {
+    font-size: medium;
+    font-weight: 500;
+}
+
+.floater {
+    z-index : 20;
+    width: 100%;
+    max-width: calc(100% - 40px);
+    height: auto;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-width: 0.5px;
+    border-color: #dedede;
+    border-style: solid;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    bottom: 20px;
+    margin: 0 auto;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.proses-button {
+    padding: 20px;
+    background-color: rgb(200, 115, 3);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 20px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Animasi transisi */
+}
+
+.proses-button:hover {
+    background-color: rgb(255, 181, 90); /* Warna saat hover */
+}
+
+.total {
+    font-size: 20px;
+    font-weight: bold;
+    margin-left: 20px;
+    color: gray;
+}
+
+
+.sub-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input-group {
+    flex: 1;
+}
+
+.image-preview {
+    margin-top: 20px;
+}
+
+.image-preview h3 {
+    margin-bottom: 10px;
+}
+
+.image-preview p {
+    padding: 10px;
+    background-color: #eee;
+    border-radius: 4px;
+}
+
+
+
+
+.service-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.service-item:hover {
+    background-color: #f9f9f9;
+}
+
+.service-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    object-fit: cover;
+    margin-left: 10px;
+}
+
+.service-item .service-info {
+    flex: 1;
+    margin-right: 10px;
+}
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 5px;
+    font-size:smaller;
+    font-weight: 500;
+    border: 1px solid #dedede;
+    border-radius: 10px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus, .form-group select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

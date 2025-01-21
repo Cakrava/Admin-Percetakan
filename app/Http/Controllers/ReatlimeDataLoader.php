@@ -22,6 +22,8 @@ use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Env;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Http;
 
 class ReatlimeDataLoader extends Controller
 {
@@ -578,23 +580,22 @@ class ReatlimeDataLoader extends Controller
                 ], 404);
             }
     
+            // Ambil data payment
             $payment = Payment::find($transaction->id_payment);
-            if (!$customer) {
+            if (!$payment) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Data customer tidak ditemukan.',
+                    'message' => 'Data payment tidak ditemukan.',
                 ], 404);
             }
     
             // Ambil data detail transaksi berdasarkan group_id
             $detailTransactions = DetailTransaction::where('group_id', $transaction->group_id)->get();
     
-        
-            $detailData = [];
-            foreach ($detailTransactions as $detail) {
+            // Format data detail transaksi
+            $detailData = $detailTransactions->map(function ($detail) {
                 $service = Service::find($detail->service_id); // Ambil nama layanan dari tabel Service
-                $detailData[] = [
-
+                return [
                     'service_name' => $service->name_services,
                     'service_id' => $detail->service_id,
                     'jumlah' => $detail->jumlah,
@@ -603,37 +604,29 @@ class ReatlimeDataLoader extends Controller
                     'lebar' => $detail->lebar,
                     'harga' => $detail->harga,
                 ];
-            }
+            });
     
-            // Format data untuk dikirim ke endpoint
-            $dataToSend = [
-                'phoneNumber' => $this->formatPhoneNumber($customer->number), // Format nomor telepon
-                'data' => [
-                    'id_transaksi' => $transaction->id,
-                    'id_customer' => $transaction->id_customer,
-                    'name' => $customer->name,
-                    'number' => $customer->number,
-                    'address' => $customer->address,
-                    'total_price' => $transaction->total_price,
-                    'status' => $transaction->status,
-                    'method' => $payment->method,
-                    'detail_transaksi' => $detailData, // Data detail transaksi
-                ],
-                'caption' => 'Data transaksi dan detail pembelian',
+            // Format data untuk dikembalikan sebagai response
+            $responseData = [
+                'id_transaksi' => $transaction->id,
+                'id_customer' => $transaction->id_customer,
+                'name' => $customer->name,
+                'number' => $customer->number,
+                'address' => $customer->address,
+                'total_price' => $transaction->total_price,
+                'status' => $transaction->status,
+                'method' => $payment->method,
+                'detail_transaksi' => $detailData, // Data detail transaksi
             ];
     
-            // Kirim data ke endpoint
-            
-            $client = new \GuzzleHttp\Client();
-            $response = $client->post(Env::get('WHATSAPP_BOT') . 'send-faktur-completed', [
-                'json' => $dataToSend,
-            ]);
+            // Panggil fungsi generateAndSendPdf setelah semua validasi dan pemrosesan data selesai
+            $this->generateAndSendPdf($id);
     
             // Berikan response sukses
             return response()->json([
                 'success' => true,
-                'message' => 'Status transaksi berhasil diubah menjadi Completed dan data dikirim ke endpoint.',
-                'endpoint_response' => json_decode($response->getBody(), true),
+                'message' => 'Status transaksi berhasil diubah menjadi Completed.',
+                'data' => $responseData,
             ]);
         } catch (\Exception $e) {
             // Tangani error dan kembalikan pesan error
@@ -644,7 +637,6 @@ class ReatlimeDataLoader extends Controller
             ], 500);
         }
     }
-    
 
 
     public function getDetailTransaction($id)
@@ -738,6 +730,91 @@ class ReatlimeDataLoader extends Controller
             'transaction' => $formattedTransaction,
         ]);
     }
+    public function generatePdf($id)
+    {
+        // Ambil data transaksi berdasarkan ID dengan relasi yang lengkap
+        $transaction = Transaction::with([
+            'customer', 
+            'payment', 
+            'detailTransactions.service', 
+            'detailTransactions.material', 
+        ])->findOrFail($id);
+    
+        // Generate PDF menggunakan template di resources/views/filament/view/pdf-view.blade.php
+        $pdf = PDF::loadView('filament.view.pdf-view', compact('transaction'));
+    
+        // Simpan PDF ke storage untuk debugging
+        $pdfPath = storage_path("app/public/faktur-transaksi-{$id}.pdf");
+        $pdf->save($pdfPath);
+    
+        // Unduh PDF
+        return $pdf->download("faktur-transaksi-{$id}.pdf");
+    }
+    public function generateAndSendPdf($id)
+{
+    // Ambil data transaksi berdasarkan ID dengan relasi yang lengkap
+    $transaction = Transaction::with([
+        'customer', 
+        'payment', 
+        'detailTransactions.service', 
+        'detailTransactions.material', 
+    ])->findOrFail($id);
 
+    // Generate PDF menggunakan fungsi yang sudah berfungsi
+    $pdf = PDF::loadView('filament.view.pdf-view', compact('transaction'));
+
+    // Simpan PDF ke storage untuk debugging
+    $pdfPath = storage_path("app/public/faktur-transaksi-{$id}.pdf");
+    $pdf->save($pdfPath);
+
+    // Baca file PDF sebagai base64
+    $pdfBase64 = base64_encode(file_get_contents($pdfPath));
+
+    // Validasi dan konversi nomor telepon
+    $phoneNumber = $this->nomorhape($transaction->customer->number);
+
+    // Kirim data ke server Node.js
+    $response = Http::post('http://localhost:3000/send-faktur', [
+        'phoneNumber' => $phoneNumber, // Nomor telepon yang sudah diformat
+        'pdfBase64' => $pdfBase64,
+        'caption' => 'Berikut adalah faktur transaksi Anda.',
+    ]);
+
+    // Hapus file PDF sementara
+    unlink($pdfPath);
+
+    // Berikan respons ke client
+    if ($response->successful()) {
+        return response()->json(['success' => true, 'message' => 'Faktur berhasil dikirim']);
+    } else {
+        return response()->json(['success' => false, 'message' => 'Gagal mengirim faktur'], 500);
+    }
+}
+
+private function nomorhape($phoneNumber)
+{
+    // Hapus semua karakter non-digit
+    $phoneNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
+
+    // Jika nomor diawali dengan 08, ganti 0 dengan 62
+    if (strpos($phoneNumber, '08') === 0) {
+        $phoneNumber = '62' . substr($phoneNumber, 1);
+    }
+    // Jika nomor diawali dengan 8, tambahkan 62 di depannya
+    elseif (strpos($phoneNumber, '8') === 0) {
+        $phoneNumber = '62' . $phoneNumber;
+    }
+    // Jika nomor sudah diawali dengan 62, biarkan seperti itu
+    elseif (strpos($phoneNumber, '62') === 0) {
+        // Nomor sudah valid
+    }
+    // Jika format tidak sesuai, kembalikan error
+    else {
+        throw new \Exception('Format nomor telepon tidak valid');
+    }
+
+    return $phoneNumber;
+}
+    
    
 }

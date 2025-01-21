@@ -157,7 +157,7 @@
             <br>
             <br>
 
-            <div style="text-align: right;">
+            <div style="text-align: right;" id="tanda-tangan">
                 <p style="font-size: 14px; margin-top: 5px; color: #7f8c8d; margin-bottom: 0;margin-right : 25px">
                     Padang
                 </p>
@@ -197,9 +197,17 @@
         display: none;
     }
 
+    #tanda-tangan {
+        display: none;
+    }
+
     /* Tampilkan kop hanya saat mencetak */
     @media print {
         #tampil-kop {
+            display: block;
+        }
+
+        #tanda-tangan {
             display: block;
         }
 

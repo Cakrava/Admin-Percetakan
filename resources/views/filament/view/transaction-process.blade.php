@@ -21,7 +21,8 @@
         border-radius: 5px;
         object-fit: cover;
     }
-/* Gaya untuk container transaksi */
+
+    /* Gaya untuk container transaksi */
     .transaction-container {
         border: 1px solid #dedede;
         border-radius: 10px;
@@ -31,13 +32,15 @@
         margin: 0 auto;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
+
     .status {
         font-weight: bold;
-        color :rgb(0, 123, 94);
+        color: rgb(0, 123, 94);
         font-size: 40px;
         text-align: right;
         margin-bottom: 20px;
     }
+
     .transaction-info {
         font-size: 18px;
         color: #333;
@@ -46,22 +49,27 @@
         gap: 15px;
         margin-bottom: 20px;
     }
+
     .transaction-info p {
         margin: 0;
     }
+
     .detail-transactions {
         margin-top: 20px;
     }
+
     .detail-transactions h3 {
         margin-bottom: 10px;
         font-size: 20px;
         color: #333;
     }
+
     .detail-transactions ul {
         list-style-type: none;
         padding: 0;
         margin: 0;
     }
+
     .detail-transactions li {
         background-color: #f9f9f9;
         padding: 10px;
@@ -69,6 +77,7 @@
         margin-bottom: 10px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
+
     .pay-button {
         color: white;
         background-color: rgb(200, 115, 3);
@@ -82,23 +91,46 @@
         font-size: 18px;
         margin-top: 20px;
     }
+
     .pay-button:hover {
+        background-color: rgb(255, 190, 106);
+    }
+
+    .print-button {
+        color: white;
+        background-color: rgb(200, 115, 3);
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-align: center;
+        width: 100%;
+        font-size: 18px;
+        margin-top: 20px;
+    }
+
+    .print-button:hover {
         background-color: rgb(255, 190, 106);
     }
 
     /* Gaya untuk modal */
     .modal {
-        display: none; /* Modal disembunyikan secara default */
+        display: none;
+        /* Modal disembunyikan secara default */
         position: fixed;
-        z-index: 1000; /* Pastikan z-index lebih tinggi dari elemen lain */
+        z-index: 1000;
+        /* Pastikan z-index lebih tinggi dari elemen lain */
         left: 0;
         top: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Latar belakang semi-transparan */
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Latar belakang semi-transparan */
         justify-content: center;
         align-items: center;
-        animation: fadeIn 0.3s ease; /* Animasi fadeIn */
+        animation: fadeIn 0.3s ease;
+        /* Animasi fadeIn */
     }
 
     .modal-content {
@@ -161,8 +193,13 @@
 
     /* Animasi fadeIn */
     @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
     }
 
     /* Mencegah scroll pada body saat modal terbuka */
@@ -180,6 +217,7 @@
     </div>
     <div>
         <button class="pay-button" id="pay-button" style="display: none">Konfirmasi selesai</button>
+        <button class="print-button" id="print-button" style="display: none">Cetak Faktur</button>
     </div>
 </div>
 
@@ -197,6 +235,10 @@
             <button class="cancel" id="cancel-button">Tidak</button>
         </div>
     </div>
+</div>
+
+<div id="loading" style="display: none">
+    @include('filament.view.component_transaction.loader-transaction')
 </div>
 
 <!-- Script JavaScript -->
@@ -218,36 +260,36 @@
             console.error('Error:', error);
         }
     }
-
     function displayTransactionData(transaction) {
-    // Tampilkan status transaksi
+        // Tampilkan status transaksi
+        document.getElementById('status').textContent = 'On ' + transaction.status;
 
-    
+        // Sembunyikan tombol jika status adalah "Completed"
+        const payButton = document.getElementById('pay-button');
+        const printButton = document.getElementById('print-button');
 
-    document.getElementById('status').textContent = 'On ' + transaction.status;
+        if (transaction.status.toLowerCase() === 'completed') {
+            payButton.style.display = 'none';
+            printButton.style.display = 'block'; // Tampilkan tombol cetak faktur
+        } else {
+            payButton.style.display = 'block';
+            printButton.style.display = 'none'; // Sembunyikan tombol cetak faktur
+        }
 
-    // Sembunyikan tombol jika status adalah "Completed"
-    const payButton = document.getElementById('pay-button');
-    if (transaction.status.toLowerCase() === 'completed') {
-        payButton.style.display = 'none';
-    } else {
-        payButton.style.display = 'block';
-    }
+        // Tampilkan detail layanan
+        const detailTransactions = document.getElementById('detail-transactions');
+        detailTransactions.innerHTML = ''; // Kosongkan list sebelum diisi
+        transaction.detail_transactions.forEach(detail => {
+            const li = document.createElement('li');
 
-    // Tampilkan detail layanan
-    const detailTransactions = document.getElementById('detail-transactions');
-    detailTransactions.innerHTML = ''; // Kosongkan list sebelum diisi
-    transaction.detail_transactions.forEach(detail => {
-        const li = document.createElement('li');
+            // Cek apakah panjang dan lebar memiliki value
+            const showPanjangLebar = detail.panjang && detail.lebar;
+            const showQuantity = detail.quantity;
 
-        // Cek apakah panjang dan lebar memiliki value
-        const showPanjangLebar = detail.panjang && detail.lebar;
-        const showQuantity = detail.quantity;
-
-        // Buat konten detail info
-        const detailInfo = document.createElement('div');
-        detailInfo.className = 'detail-info';
-        detailInfo.innerHTML = `
+            // Buat konten detail info
+            const detailInfo = document.createElement('div');
+            detailInfo.className = 'detail-info';
+            detailInfo.innerHTML = `
             <strong>Layanan:</strong> ${detail.service_name} <br>
             <strong>Material:</strong> ${detail.material_name} <br>
             <strong>Lampiran:</strong> ${detail.lampiran ? `<a href="/storage/${detail.lampiran}" download style="color: orange"> Unduh</a>` : '-'} <br>
@@ -256,24 +298,58 @@
             ${showQuantity ? `<strong>Quantity:</strong> ${detail.quantity} <br>` : ''}
         `;
 
-        // Tambahkan gambar jika ada
-        const detailImage = document.createElement('img');
-        if (detail.image) {
-            detailImage.src = `/storage/${detail.image}`;
-            detailImage.className = 'detail-image';
-            detailImage.alt = 'Image';
-        }
+            // Tambahkan gambar jika ada
+            const detailImage = document.createElement('img');
+            if (detail.image) {
+                detailImage.src = `/storage/${detail.image}`;
+                detailImage.className = 'detail-image';
+                detailImage.alt = 'Image';
+            }
 
-        // Gabungkan detail info dan gambar ke dalam li
-        li.appendChild(detailInfo);
-        if (detail.image) {
-            li.appendChild(detailImage);
-        }
+            // Gabungkan detail info dan gambar ke dalam li
+            li.appendChild(detailInfo);
+            if (detail.image) {
+                li.appendChild(detailImage);
+            }
 
-        detailTransactions.appendChild(li);
+            detailTransactions.appendChild(li);
+        });
+    }
+    // Event listener untuk tombol "Cetak Faktur"
+    document.getElementById('print-button').addEventListener('click', async function () {
+        try {
+            const loader = document.getElementById('loading')
+            loader.style.display = 'block'; // Tampilkan loader
+            // Kirim request ke backend untuk generate PDF
+            const response = await fetch(`/send-faktur/${recordId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+            });
+
+            if (response.ok) {
+                // Jika berhasil, unduh PDF
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `faktur-transaksi-${recordId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                loader.style.display = 'none'
+            } else {
+                alert('Gagal menghasilkan PDF.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            loader.style.display = 'none'
+            alert('Terjadi kesalahan saat mencetak faktur.');
+        }
     });
-}
-
 
     // Fungsi untuk menampilkan modal konfirmasi
     function showConfirmationModal() {
@@ -295,6 +371,8 @@
     // Event listener untuk tombol "Ya" di modal
     document.getElementById('confirm-button').addEventListener('click', async function () {
         try {
+            const loader = document.getElementById('loading')
+            loader.style.display = 'block'; // Tampilkan loader
             // Kirim request ke backend untuk memproses pembayaran
             const response = await fetch(`/proses-selesai/${recordId}`, {
                 method: 'POST',
@@ -310,11 +388,15 @@
                 // alert(data.message); // Tampilkan pesan sukses
                 hideConfirmationModal(); // Sembunyikan modal
                 fetchTransactionData(); // Perbarui data transaksi setelah pembayaran
+
+                loader.style.display = 'none'; // Tampilkan loader
                 history.back();
             } else {
                 alert(data.message); // Tampilkan pesan error
                 if (data.error) {
                     console.error('Error:', data.error); // Log error untuk debugging
+
+                    loader.style.display = 'none'; // Tampilkan loader
                 }
             }
         } catch (error) {

@@ -33,7 +33,7 @@
     <div style="display: flex; justify-content: center; align-items: center;">
         <img id="qrImage" src="#" alt="QR Code"
             style="max-width: 100%; height: auto; border-radius: 5px; display: none;">
-        <img id="logoImage" src="{{ asset('img/logo_icon.png') }}" alt="Logo"
+        <img id="logoImage" src="{{ asset('img/Successul.png') }}" alt="Logo"
             style="max-width: 100%; height: auto; border-radius: 5px; display: none;">
     </div>
 </div>

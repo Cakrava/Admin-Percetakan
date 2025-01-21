@@ -26,12 +26,13 @@ use Illuminate\Support\Facades\Cache;
 
 
 
+use App\Http\Controllers\TransactionController;
+
+Route::post('/send-faktur/{id}', [ReatlimeDataLoader::class, 'generateAndSendPdf']);
 
 
 
 
-
-Route::post('/send-file', [WhatsAppController::class, 'sendFile']);
 Route::post('/whatsapp/logout', [WhatsAppController::class, 'logout'])->name('whatsapp.logout');
 // routes/api.php
 // Route::get('/detailTransaksi/{id}', [ReatlimeDataLoader::class, 'show']);
@@ -54,6 +55,7 @@ Route::get('/clear-temp-data', [ReatlimeDataLoader::class, 'clearTempData']);
 Route::delete('/hapus-transaction/{itemId}', [ReatlimeDataLoader::class, 'hapusTransaction']);
 
 // for customer transactions
+Route::get('/generate-pdf/{id}', [ReatlimeDataLoader::class, 'generatePdf']);
 Route::get('/api/detailTransaksi/{id}', [ReatlimeDataLoader::class, 'getDetailTransaction']);
 Route::get('/api/customers', [ReatlimeDataLoader::class, 'getCustomers']);
 Route::post('/saveCustomerTransaction', [ReatlimeDataLoader::class, 'saveCustomerData']);

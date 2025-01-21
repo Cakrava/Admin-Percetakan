@@ -23,7 +23,11 @@ class service extends Model
     ];
 
     // Menambahkan relasi ke model Material
-    
+    public function material()
+    {
+        return $this->belongsTo(Material::class, 'id_material', 'id');
+    }
+
     public function detailTransaction()
     {
         return $this->hasMany(DetailTransaction::class, 'service_id', 'id');
@@ -31,10 +35,6 @@ class service extends Model
     public function tempDataTransactions()
     {
         return $this->hasMany(TempDataTransaction::class, 'service_id', 'id');
-    }
-    public function material()
-    {
-        return $this->belongsTo(Material::class, 'id_material', 'id');
     }
     public function category()
     {
